@@ -1,4 +1,4 @@
-# InspireFit
+# FanFit
 
 React Native (Expo) app that builds **workout routines** from what motivates you: a **sport**, a **celebrity**, or a **fictional character**. Pick a type, enter a name, and get a structured session (warm-up, main work, conditioning, cool-down) with an estimated duration.
 
@@ -13,7 +13,7 @@ Routines are generated **on device** from themed exercise pools and rules—no A
 ## Getting started
 
 ```bash
-cd workout-inspire
+cd fan-fit
 npm install
 npm start
 ```

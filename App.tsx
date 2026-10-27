@@ -128,7 +128,7 @@ function HomeBody() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.hero}>
-          <Text style={styles.kicker}>InspireFit</Text>
+          <Text style={styles.kicker}>FanFit</Text>
           <Text style={styles.title}>Workouts from what motivates you</Text>
           <Text style={styles.lede}>
             Pick a sport, a celebrity, or a fictional character. Sets and reps scale to your age, gender, and activity level.
