@@ -24,7 +24,7 @@ There is no test runner, linter, or formatter configured.
 
 ## Stack
 
-Expo SDK 54, React Native 0.81 (new architecture enabled), React 19, TypeScript. Entry is `index.ts` → `App.tsx`. Tutorial videos play in-app through `react-native-youtube-iframe` (WebView-based).
+Expo SDK 58, React Native 0.88 (new architecture always on), React 19.3, TypeScript 6. Entry is `index.ts` → `App.tsx`. Tutorial videos play in-app through `react-native-youtube-iframe` (WebView-based).
 
 ## Architecture
 

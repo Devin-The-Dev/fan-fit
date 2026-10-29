@@ -6,6 +6,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   StyleSheet,
   Text,
   TextInput,
@@ -74,7 +75,7 @@ function buildProfile(
 
 function HomeBody() {
   const insets = useSafeAreaInsets();
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const [kind, setKind] = useState<InspirationKind>('sport');
   const [name, setName] = useState('');
   const [ageText, setAgeText] = useState(String(DEFAULT_PROFILE.age));
