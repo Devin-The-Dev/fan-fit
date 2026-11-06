@@ -1,20 +1,17 @@
 # Current Feature
-Main Menu Redesign — Redesign the app's UI/UX based on the reference screenshots.
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+<!-- Not Started | In Progress | Completed -->
 
 ## Goals
 
-- Redesign the GUI as shown in `context/screenshots/MainMenu.png`
-- Apply colors from `context/screenshots/AdobeColor-My Color Theme.jpeg`. Make sure to use all 5 colors.
-- Layout and design reference already provided; implementation follows the screenshot and apply all 5 colors where necessary
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Spec: `context/features/main-menu-spec.md`
-- Reference screenshots: `context/screenshots/MainMenu.png`, `ProfileMenu.png`, `WorkoutPage.png`, `WorkoutPageCollapsed.png`, `context/screenshots/MainMenu.png`
+<!-- Any extra notes -->
 
 ## History
 
