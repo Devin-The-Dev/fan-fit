@@ -11,9 +11,7 @@ import {
 } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 import { getYouTubeAppUrl } from '../exerciseVideos';
-
-const ACCENT = '#34d399';
-const BG = '#0c1222';
+import { COLORS } from '../theme';
 
 interface Props {
   title: string;
@@ -113,7 +111,7 @@ export function ExerciseVideoPlayer({ title, videos, visible, onClose }: Props) 
             <>
               {!ready && (
                 <View style={styles.loading}>
-                  <ActivityIndicator color={ACCENT} size="large" />
+                  <ActivityIndicator color={COLORS.accent} size="large" />
                 </View>
               )}
               <YoutubePlayer
@@ -154,7 +152,7 @@ export function ExerciseVideoPlayer({ title, videos, visible, onClose }: Props) 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BG,
+    backgroundColor: COLORS.background,
     paddingTop: 56,
     paddingHorizontal: 16,
   },
@@ -167,12 +165,12 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    color: '#f8fafc',
+    color: COLORS.text,
     fontSize: 18,
     fontWeight: '700',
   },
   closeBtn: { paddingVertical: 4 },
-  closeText: { color: ACCENT, fontSize: 16, fontWeight: '700' },
+  closeText: { color: COLORS.accent, fontSize: 16, fontWeight: '700' },
   subExerciseList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -182,25 +180,25 @@ const styles = StyleSheet.create({
   subExerciseChip: {
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#2a364f',
-    backgroundColor: '#121a2e',
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.surface,
     paddingVertical: 8,
     paddingHorizontal: 12,
   },
   subExerciseChipActive: {
-    borderColor: '#1f4d3d',
-    backgroundColor: '#132a22',
+    borderColor: COLORS.secondary,
+    backgroundColor: COLORS.selectedSurface,
   },
   subExerciseChipPressed: { opacity: 0.85 },
   subExerciseText: {
-    color: '#94a3b8',
+    color: COLORS.textMuted,
     fontSize: 13,
     fontWeight: '600',
   },
-  subExerciseTextActive: { color: ACCENT },
+  subExerciseTextActive: { color: COLORS.accent },
   playerWrap: {
     width: '100%',
-    backgroundColor: '#000',
+    backgroundColor: COLORS.black,
     borderRadius: 12,
     overflow: 'hidden',
     justifyContent: 'center',
@@ -210,7 +208,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1,
-    backgroundColor: '#000',
+    backgroundColor: COLORS.black,
   },
   errorBox: {
     flex: 1,
@@ -220,13 +218,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   errorTitle: {
-    color: '#f8fafc',
+    color: COLORS.text,
     fontSize: 16,
     fontWeight: '700',
     textAlign: 'center',
   },
   errorBody: {
-    color: '#94a3b8',
+    color: COLORS.textMuted,
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
@@ -236,11 +234,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 12,
-    backgroundColor: ACCENT,
+    backgroundColor: COLORS.accent,
   },
-  youtubeBtnPrimaryText: { color: '#042f24', fontSize: 15, fontWeight: '800' },
+  youtubeBtnPrimaryText: { color: COLORS.textOnAccent, fontSize: 15, fontWeight: '800' },
   hint: {
-    color: '#94a3b8',
+    color: COLORS.textMuted,
     fontSize: 14,
     lineHeight: 20,
     marginTop: 16,
@@ -252,8 +250,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#1f4d3d',
-    backgroundColor: '#132a22',
+    borderColor: COLORS.secondary,
+    backgroundColor: COLORS.selectedSurface,
   },
-  youtubeBtnText: { color: ACCENT, fontSize: 15, fontWeight: '700' },
+  youtubeBtnText: { color: COLORS.accent, fontSize: 15, fontWeight: '700' },
 });
