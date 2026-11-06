@@ -14,9 +14,20 @@ import {
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ExerciseVideoPlayer } from './src/components/ExerciseVideoPlayer';
+import {
+  type InspirationOption,
+  InspirationTypePicker,
+} from './src/components/mainMenu/InspirationTypePicker';
+import { type Option, OptionGroup } from './src/components/mainMenu/OptionGroup';
+import { ProfileCard } from './src/components/mainMenu/ProfileCard';
+import { ProfileSheet } from './src/components/mainMenu/ProfileSheet';
+import { SectionLabel } from './src/components/mainMenu/SectionLabel';
+import { RoutineCard } from './src/components/workout/RoutineCard';
 import { generateWorkout } from './src/generateWorkout';
+import { COLORS, RADIUS, SPACING } from './src/theme';
 import type {
   ActivityLevel,
+  Exercise,
   Gender,
   InspirationKind,
   UserProfile,
@@ -25,26 +36,31 @@ import type {
 } from './src/types';
 import { DEFAULT_PROFILE } from './src/types';
 
-const ACCENT = '#34d399';
-const BG = '#0c1222';
-const CARD = '#151d33';
-const MUTED = '#94a3b8';
-const BORDER = '#273352';
+interface ActiveVideo {
+  title: string;
+  videos: { name: string; videoId: string }[];
+}
 
-const KINDS: { key: InspirationKind; label: string; hint: string }[] = [
-  { key: 'sport', label: 'Sport', hint: 'e.g. basketball, swimming, boxing' },
-  { key: 'celebrity', label: 'Celebrity', hint: 'e.g. actor, musician, public figure' },
-  { key: 'character', label: 'Fictional character', hint: 'e.g. superhero, anime lead, book hero' },
+const KINDS: InspirationOption[] = [
+  { key: 'sport', label: 'Sport', icon: '🏅' },
+  { key: 'celebrity', label: 'Celebrity', icon: '⭐' },
+  { key: 'character', label: 'Fictional character', icon: '🦸' },
 ];
 
-const GENDERS: { key: Gender; label: string }[] = [
+const KIND_HINTS: Record<InspirationKind, string> = {
+  sport: 'e.g. basketball, swimming, boxing',
+  celebrity: 'e.g. actor, musician, public figure',
+  character: 'e.g. superhero, anime lead, book hero',
+};
+
+const GENDERS: Option<Gender>[] = [
   { key: 'female', label: 'Female' },
   { key: 'male', label: 'Male' },
   { key: 'non_binary', label: 'Non-binary' },
   { key: 'prefer_not_to_say', label: 'Prefer not to say' },
 ];
 
-const ACTIVITY_LEVELS: { key: ActivityLevel; label: string }[] = [
+const ACTIVITY_LEVELS: Option<ActivityLevel>[] = [
   { key: 'sedentary', label: 'Sedentary' },
   { key: 'light', label: 'Light' },
   { key: 'moderate', label: 'Moderate' },
@@ -52,25 +68,17 @@ const ACTIVITY_LEVELS: { key: ActivityLevel; label: string }[] = [
   { key: 'very_active', label: 'Very active' },
 ];
 
-const WORKOUT_DURATIONS: { key: WorkoutDuration; label: string }[] = [
-  { key: 30, label: '30 minutes' },
-  { key: 45, label: '45 minutes' },
+const WORKOUT_DURATIONS: Option<WorkoutDuration>[] = [
+  { key: 30, label: '30 min' },
+  { key: 45, label: '45 min' },
   { key: 60, label: '1 hour' },
 ];
 
-function parseAge(raw: string): number {
-  const n = parseInt(raw.replace(/\D/g, ''), 10);
-  if (Number.isNaN(n)) return DEFAULT_PROFILE.age;
-  return Math.min(90, Math.max(13, n));
-}
-
-function buildProfile(
-  ageText: string,
-  gender: Gender,
-  activityLevel: ActivityLevel,
-  durationMinutes: WorkoutDuration
-): UserProfile {
-  return { age: parseAge(ageText), gender, activityLevel, durationMinutes };
+function toActiveVideo(exercise: Exercise): ActiveVideo {
+  return {
+    title: exercise.name,
+    videos: exercise.tutorialVideos.map((video) => ({ name: video.name, videoId: video.videoId })),
+  };
 }
 
 function HomeBody() {
@@ -78,36 +86,36 @@ function HomeBody() {
   const scrollRef = useRef<ScrollViewInstance>(null);
   const [kind, setKind] = useState<InspirationKind>('sport');
   const [name, setName] = useState('');
-  const [ageText, setAgeText] = useState(String(DEFAULT_PROFILE.age));
+  const [age, setAge] = useState(DEFAULT_PROFILE.age);
   const [gender, setGender] = useState<Gender>(DEFAULT_PROFILE.gender);
   const [activityLevel, setActivityLevel] = useState<ActivityLevel>(DEFAULT_PROFILE.activityLevel);
   const [durationMinutes, setDurationMinutes] = useState<WorkoutDuration>(DEFAULT_PROFILE.durationMinutes);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [variation, setVariation] = useState(0);
   const [routine, setRoutine] = useState<WorkoutRoutine | null>(null);
   const [routineStartY, setRoutineStartY] = useState<number | null>(null);
   const [pendingRoutineScroll, setPendingRoutineScroll] = useState(false);
-  const [activeVideo, setActiveVideo] = useState<
-    { title: string; videos: { name: string; videoId: string }[] } | null
-  >(null);
+  const [activeVideo, setActiveVideo] = useState<ActiveVideo | null>(null);
 
-  const hint = useMemo(() => KINDS.find((k) => k.key === kind)?.hint ?? '', [kind]);
-  const profile = useMemo(
-    () => buildProfile(ageText, gender, activityLevel, durationMinutes),
-    [ageText, gender, activityLevel, durationMinutes]
+  const profile = useMemo<UserProfile>(
+    () => ({ age, gender, activityLevel, durationMinutes }),
+    [age, gender, activityLevel, durationMinutes]
   );
+  const genderLabel = GENDERS.find((g) => g.key === gender)?.label ?? '';
 
-  const onGenerate = () => {
+  const generate = () => {
     setPendingRoutineScroll(true);
     const next = variation + 1;
     setVariation(next);
     setRoutine(generateWorkout(kind, name, next, profile));
   };
 
-  const onNewVariation = () => {
-    setPendingRoutineScroll(true);
-    const next = variation + 1;
-    setVariation(next);
-    setRoutine(generateWorkout(kind, name, next, profile));
+  const onWatchTutorial = (exercise: Exercise) => {
+    if (exercise.tutorialVideos.length > 0) {
+      setActiveVideo(toActiveVideo(exercise));
+    } else {
+      Linking.openURL(exercise.videoUrl);
+    }
   };
 
   useEffect(() => {
@@ -118,10 +126,7 @@ function HomeBody() {
   }, [pendingRoutineScroll, routine, routineStartY]);
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.flex, { paddingTop: insets.top }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={styles.scrollContent}
@@ -130,185 +135,79 @@ function HomeBody() {
       >
         <View style={styles.hero}>
           <Text style={styles.kicker}>FanFit</Text>
-          <Text style={styles.title}>Workouts from what motivates you</Text>
+          <Text style={styles.title}>Train like your icon.</Text>
           <Text style={styles.lede}>
-            Pick a sport, a celebrity, or a fictional character. Sets and reps scale to your age, gender, and activity level.
+            Pick a sport, a celebrity, or a fictional character. Sets and reps scale to you.
           </Text>
         </View>
 
-        <Text style={styles.sectionLabel}>About you</Text>
-        <Text style={styles.fieldLabel}>Age</Text>
-        <TextInput
-          value={ageText}
-          onChangeText={setAgeText}
-          placeholder="30"
-          placeholderTextColor="#64748b"
-          style={styles.input}
-          keyboardType="number-pad"
-          maxLength={2}
-          returnKeyType="done"
-        />
-
-        <Text style={styles.fieldLabel}>Gender</Text>
-        <View style={styles.row}>
-          {GENDERS.map((item) => {
-            const active = gender === item.key;
-            return (
-              <Pressable
-                key={item.key}
-                onPress={() => setGender(item.key)}
-                style={({ pressed }) => [
-                  styles.chip,
-                  active && styles.chipActive,
-                  pressed && styles.chipPressed,
-                ]}
-              >
-                <Text style={[styles.chipText, active && styles.chipTextActive]}>{item.label}</Text>
-              </Pressable>
-            );
-          })}
+        <View style={styles.section}>
+          <SectionLabel>Profile</SectionLabel>
+          <ProfileCard summary={`Your profile · ${genderLabel}, ${age}`} onEdit={() => setProfileOpen(true)} />
         </View>
 
-        <Text style={styles.fieldLabel}>Activity level</Text>
-        <View style={styles.row}>
-          {ACTIVITY_LEVELS.map((item) => {
-            const active = activityLevel === item.key;
-            return (
-              <Pressable
-                key={item.key}
-                onPress={() => setActivityLevel(item.key)}
-                style={({ pressed }) => [
-                  styles.chip,
-                  active && styles.chipActive,
-                  pressed && styles.chipPressed,
-                ]}
-              >
-                <Text style={[styles.chipText, active && styles.chipTextActive]}>{item.label}</Text>
-              </Pressable>
-            );
-          })}
+        <View style={styles.section}>
+          <SectionLabel>Workout session</SectionLabel>
+          <SectionLabel variant="field">Activity level</SectionLabel>
+          <OptionGroup options={ACTIVITY_LEVELS} value={activityLevel} onChange={setActivityLevel} />
+          <View style={styles.fieldGap} />
+          <SectionLabel variant="field">Workout length</SectionLabel>
+          <OptionGroup
+            options={WORKOUT_DURATIONS}
+            value={durationMinutes}
+            onChange={setDurationMinutes}
+            variant="segment"
+          />
         </View>
 
-        <Text style={styles.fieldLabel}>Workout length</Text>
-        <View style={styles.row}>
-          {WORKOUT_DURATIONS.map((item) => {
-            const active = durationMinutes === item.key;
-            return (
-              <Pressable
-                key={item.key}
-                onPress={() => setDurationMinutes(item.key)}
-                style={({ pressed }) => [
-                  styles.chip,
-                  active && styles.chipActive,
-                  pressed && styles.chipPressed,
-                ]}
-              >
-                <Text style={[styles.chipText, active && styles.chipTextActive]}>{item.label}</Text>
-              </Pressable>
-            );
-          })}
+        <View style={styles.section}>
+          <SectionLabel>Inspiration type</SectionLabel>
+          <InspirationTypePicker options={KINDS} value={kind} onChange={setKind} />
         </View>
 
-        <Text style={styles.sectionLabel}>Inspiration type</Text>
-        <View style={styles.row}>
-          {KINDS.map((item) => {
-            const active = kind === item.key;
-            return (
-              <Pressable
-                key={item.key}
-                onPress={() => setKind(item.key)}
-                style={({ pressed }) => [
-                  styles.chip,
-                  active && styles.chipActive,
-                  pressed && styles.chipPressed,
-                ]}
-              >
-                <Text style={[styles.chipText, active && styles.chipTextActive]}>{item.label}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        <Text style={styles.sectionLabel}>Who or what inspires this session?</Text>
+        <SectionLabel>Who or what inspires this session?</SectionLabel>
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholder={hint}
-          placeholderTextColor="#64748b"
+          placeholder={KIND_HINTS[kind]}
+          placeholderTextColor={COLORS.textSubtle}
+          selectionColor={COLORS.accent}
           style={styles.input}
           autoCapitalize="words"
           autoCorrect
           returnKeyType="done"
+          onSubmitEditing={generate}
         />
 
+        {routine && (
+          <RoutineCard
+            routine={routine}
+            onWatchTutorial={onWatchTutorial}
+            onShuffle={generate}
+            onLayoutY={setRoutineStartY}
+          />
+        )}
+      </ScrollView>
+
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <Pressable
-          onPress={onGenerate}
+          onPress={generate}
+          accessibilityRole="button"
           style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryBtnPressed]}
         >
           <Text style={styles.primaryBtnText}>Generate routine</Text>
         </Pressable>
+      </View>
 
-        {routine && (
-          <View
-            style={styles.resultCard}
-            onLayout={(event) => setRoutineStartY(event.nativeEvent.layout.y)}
-          >
-            <View style={styles.resultHeader}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.resultTitle}>{routine.headline}</Text>
-                <Text style={styles.resultSub}>{routine.subtitle}</Text>
-              </View>
-            </View>
-            <View style={styles.metaRow}>
-              <Text style={styles.metaBadge}>{routine.focusLabel}</Text>
-              <Text style={styles.metaTime}>~{routine.estimatedMinutes} min</Text>
-            </View>
-            <Text style={styles.tailoring}>{routine.tailoringLabel}</Text>
-
-            {routine.sections.map((sec) => (
-              <View key={sec.title} style={styles.block}>
-                <Text style={styles.blockTitle}>{sec.title}</Text>
-                {sec.exercises.map((ex) => (
-                  <View key={ex.name + ex.detail} style={styles.exercise}>
-                    <Text style={styles.exerciseName}>{ex.name}</Text>
-                    <Text style={styles.exerciseDetail}>{ex.detail}</Text>
-                    <Pressable
-                      onPress={() => {
-                        const playableVideos = ex.tutorialVideos.map((video) => ({
-                          name: video.name,
-                          videoId: video.videoId,
-                        }));
-
-                        if (playableVideos.length > 0) {
-                          setActiveVideo({
-                            title: ex.name,
-                            videos: playableVideos,
-                          });
-                        } else {
-                          Linking.openURL(ex.videoUrl);
-                        }
-                      }}
-                      style={({ pressed }) => [styles.videoBtn, pressed && styles.videoBtnPressed]}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Watch tutorial for ${ex.name}`}
-                    >
-                      <Text style={styles.videoBtnIcon}>▶</Text>
-                      <Text style={styles.videoBtnText}>Watch tutorial</Text>
-                    </Pressable>
-                  </View>
-                ))}
-              </View>
-            ))}
-
-            <Pressable
-              onPress={onNewVariation}
-              style={({ pressed }) => [styles.secondaryBtn, pressed && styles.secondaryBtnPressed]}
-            >
-              <Text style={styles.secondaryBtnText}>Shuffle another variation</Text>
-            </Pressable>
-          </View>
-        )}
-      </ScrollView>
+      <ProfileSheet
+        visible={profileOpen}
+        age={age}
+        gender={gender}
+        genderOptions={GENDERS}
+        onChangeAge={setAge}
+        onChangeGender={setGender}
+        onClose={() => setProfileOpen(false)}
+      />
 
       {activeVideo && (
         <ExerciseVideoPlayer
@@ -327,7 +226,7 @@ function HomeBody() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.safe} edges={['bottom']}>
+      <SafeAreaView style={styles.safe} edges={['top']}>
         <HomeBody />
       </SafeAreaView>
     </SafeAreaProvider>
@@ -335,167 +234,45 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: BG },
-  safe: { flex: 1, backgroundColor: BG },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  hero: { marginBottom: 24 },
+  flex: { flex: 1, backgroundColor: COLORS.background },
+  safe: { flex: 1, backgroundColor: COLORS.background },
+  scrollContent: { paddingHorizontal: SPACING.screenX, paddingTop: 8, paddingBottom: 32 },
+  hero: { marginBottom: 32 },
   kicker: {
-    color: ACCENT,
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    marginBottom: 8,
-  },
-  title: {
-    color: '#f8fafc',
-    fontSize: 28,
+    color: COLORS.accent,
+    fontSize: 14,
     fontWeight: '800',
-    lineHeight: 34,
-    marginBottom: 10,
+    letterSpacing: 2.5,
+    textTransform: 'uppercase',
+    marginBottom: 6,
   },
-  lede: {
-    color: MUTED,
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  sectionLabel: {
-    color: '#e2e8f0',
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 10,
-  },
-  fieldLabel: {
-    color: MUTED,
-    fontSize: 13,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  row: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 22,
-  },
-  chip: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: BORDER,
-    backgroundColor: CARD,
-  },
-  chipActive: {
-    borderColor: ACCENT,
-    backgroundColor: '#132a22',
-  },
-  chipPressed: { opacity: 0.85 },
-  chipText: { color: MUTED, fontSize: 14, fontWeight: '600' },
-  chipTextActive: { color: ACCENT },
+  title: { color: COLORS.text, fontSize: 32, fontWeight: '800', lineHeight: 38, marginBottom: 10 },
+  lede: { color: COLORS.textMuted, fontSize: 17, lineHeight: 24 },
+  section: { marginBottom: 28 },
+  fieldGap: { height: 18 },
   input: {
-    backgroundColor: CARD,
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
-    borderColor: BORDER,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: '#f8fafc',
-    marginBottom: 18,
+    borderColor: COLORS.border,
+    borderRadius: RADIUS.lg,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    fontSize: 18,
+    color: COLORS.text,
+  },
+  footer: {
+    paddingHorizontal: SPACING.screenX,
+    paddingTop: 12,
+    backgroundColor: COLORS.background,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.border,
   },
   primaryBtn: {
-    backgroundColor: ACCENT,
-    paddingVertical: 16,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  primaryBtnPressed: { opacity: 0.9 },
-  primaryBtnText: { color: '#042f24', fontSize: 17, fontWeight: '800' },
-  resultCard: {
-    marginTop: 28,
-    backgroundColor: CARD,
-    borderRadius: 18,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: BORDER,
-  },
-  resultHeader: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
-  resultTitle: {
-    color: '#f8fafc',
-    fontSize: 22,
-    fontWeight: '800',
-    marginBottom: 8,
-  },
-  resultSub: { color: MUTED, fontSize: 15, lineHeight: 22 },
-  metaRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    alignItems: 'center',
-    marginBottom: 18,
-  },
-  metaBadge: {
-    color: ACCENT,
-    fontSize: 13,
-    fontWeight: '700',
-    flex: 1,
-    minWidth: 120,
-  },
-  metaTime: { color: MUTED, fontSize: 13, fontWeight: '600' },
-  tailoring: {
-    color: MUTED,
-    fontSize: 12,
-    lineHeight: 18,
-    marginBottom: 16,
-    fontStyle: 'italic',
-  },
-  block: { marginBottom: 18 },
-  blockTitle: {
-    color: '#e2e8f0',
-    fontSize: 17,
-    fontWeight: '800',
-    marginBottom: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: BORDER,
-    paddingBottom: 8,
-  },
-  exercise: {
-    marginBottom: 14,
-    paddingLeft: 4,
-    borderLeftWidth: 3,
-    borderLeftColor: '#334155',
-    paddingVertical: 2,
-    paddingHorizontal: 12,
-  },
-  exerciseName: { color: '#f8fafc', fontSize: 16, fontWeight: '700', marginBottom: 4 },
-  exerciseDetail: { color: MUTED, fontSize: 14, lineHeight: 20, marginBottom: 10 },
-  videoBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: '#132a22',
-    borderWidth: 1,
-    borderColor: '#1f4d3d',
-  },
-  videoBtnPressed: { opacity: 0.85 },
-  videoBtnIcon: { color: ACCENT, fontSize: 12, fontWeight: '800' },
-  videoBtnText: { color: ACCENT, fontSize: 13, fontWeight: '700' },
-  secondaryBtn: {
-    marginTop: 8,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: BORDER,
+    backgroundColor: COLORS.accent,
+    paddingVertical: 18,
+    borderRadius: RADIUS.lg,
     alignItems: 'center',
   },
-  secondaryBtnPressed: { opacity: 0.85 },
-  secondaryBtnText: { color: '#e2e8f0', fontSize: 15, fontWeight: '700' },
+  primaryBtnPressed: { backgroundColor: COLORS.accentPressed },
+  primaryBtnText: { color: COLORS.textOnAccent, fontSize: 18, fontWeight: '800' },
 });
