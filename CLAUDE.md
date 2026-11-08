@@ -24,7 +24,7 @@ There is no test runner, linter, or formatter configured.
 
 ## Stack
 
-Expo SDK 58, React Native 0.88 (new architecture always on), React 19.3, TypeScript 6. Entry is `index.ts` → `App.tsx`. Tutorial videos play in-app through `react-native-youtube-iframe` (WebView-based).
+Expo SDK 58, React Native 0.88 (new architecture always on), React 19.3, TypeScript 6, NativeWind 4.2.7 (Tailwind CSS 3). Entry is `index.ts` (imports `global.css`) → `App.tsx`. Tutorial videos play in-app through `react-native-youtube-iframe` (WebView-based).
 
 ## Architecture
 
@@ -40,10 +40,11 @@ Generating a routine is a pipeline across `src/`:
 
 `src/types.ts` holds the shared types (`UserProfile`, `WorkoutRoutine`, etc.) and `DEFAULT_PROFILE`. `ExerciseTutorialVideo` is also declared again in `exerciseVideos.ts`.
 
-Styling uses plain `StyleSheet` with color constants (`ACCENT`, `BG`, …) duplicated at the top of `App.tsx` and `ExerciseVideoPlayer.tsx`. There is no theme module.
+Styling is mid-migration. `ProfileCard` uses NativeWind `className`; everything else still uses `StyleSheet` with tokens from `src/theme.ts`. NativeWind is configured through `babel.config.js`, `metro.config.js`, `tailwind.config.js` and `global.css`. Theme tokens are defined twice, in `tailwind.config.js` and `src/theme.ts`, so keep them in sync.
 
 ## Project context (`context/`)
 
 - `context/current-feature.md`: the feature in progress, its status and a dated history log. Update it as work on a feature progresses.
+- `context/research/*.md`: library and approach research notes (e.g. `nativewind.md`).
 - `context/features/*-spec.md`: feature specs. `context/screenshots/` holds the reference designs; the current feature is the main menu redesign based on `MainMenu.png`.
 - `context/project-spec.md`: the long-term product plan. It describes a **target** architecture that does not exist yet: AI generation through Gemini, a Cloudflare Workers backend, Postgres with Hyperdrive, OAuth login, RevenueCat subscriptions, and ExerciseDB GIFs. Don't assume any of it is present in the code; the current app is on-device only.
