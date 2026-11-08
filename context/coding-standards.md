@@ -62,8 +62,8 @@
 
 ## Styling
 
-- Use React Native `StyleSheet.create` for all styling (NativeWind is on the back burner - see `context/back-burner.md`)
-- All colors come from `src/theme.ts` - no hard-coded hex values in components
+- NativeWind v4 (`className`) for new and converted components; existing components still use `StyleSheet.create` until migrated (see `context/research/nativewind.md`)
+- All colors come from theme tokens - `tailwind.config.js` classes (`bg-surface`, `text-accent`) or `src/theme.ts` constants; keep the two in sync. No hard-coded hex values in components
 - Theme uses the project palette:
   - Primary Accent Green `#009C15`
   - Secondary Green `#156920`

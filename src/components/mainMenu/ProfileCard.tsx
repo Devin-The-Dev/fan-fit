@@ -1,5 +1,4 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
-import { COLORS, RADIUS } from '../../theme';
+import { Pressable, Text } from 'react-native';
 
 interface Props {
   summary: string;
@@ -12,30 +11,12 @@ export function ProfileCard({ summary, onEdit }: Props) {
       onPress={onEdit}
       accessibilityRole="button"
       accessibilityLabel="Edit profile"
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      className="flex-row items-center justify-between gap-3 p-4 rounded-lg border border-border bg-surface active:border-secondary active:bg-raised"
     >
-      <Text style={styles.summary} numberOfLines={1}>
+      <Text className="flex-1 text-text text-[17px] font-semibold" numberOfLines={1}>
         {summary}
       </Text>
-      <Text style={styles.edit}>Edit ›</Text>
+      <Text className="text-accent text-[17px] font-bold">Edit ›</Text>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.surface,
-  },
-  pressed: { borderColor: COLORS.secondary, backgroundColor: COLORS.raised },
-  summary: { flex: 1, color: COLORS.text, fontSize: 17, fontWeight: '600' },
-  edit: { color: COLORS.accent, fontSize: 17, fontWeight: '700' },
-});

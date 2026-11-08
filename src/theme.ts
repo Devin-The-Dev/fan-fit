@@ -1,3 +1,4 @@
+// tailwind.config.js mirrors these values as Tailwind theme tokens. Keep both in sync until the full NativeWind migration.
 export const PALETTE = {
   PRIMARY_ACCENT_GREEN: '#009C15',
   SECONDARY_GREEN: '#156920',

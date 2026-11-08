@@ -1,0 +1,168 @@
+# NativeWind Research
+
+Researched 2026-11-07 for switching Fan Fit's styling from React Native `StyleSheet` to NativeWind (see `context/back-burner.md`).
+
+## Why switch
+
+**Benefits**
+
+- Styles sit on the element (`className="flex-1 bg-surface p-4 rounded-lg"`), so you don't jump between JSX and a `StyleSheet.create` block.
+- No naming every style object, and no dead style entries left behind when JSX changes.
+- Theme tokens become utility classes (`bg-accent`, `text-text-muted`), so "no hard-coded hex values" happens by default.
+- Built-in variants (`active:`, `ios:`/`android:`, breakpoints) replace manual `Pressable` style functions and `Platform.select`.
+- Tailwind knowledge and config carry over to any future web surface.
+- Class strings are easy to read in diffs and well represented in AI training data.
+
+**Tradeoffs**
+
+- Every existing component needs its styles rewritten (large refactor with no visible change for users).
+- More build complexity: Metro wrapper, PostCSS, a global CSS file, TypeScript `className` typings.
+- `src/theme.ts` already centralized the colors, which was the main pain point before.
+- Some runtime work for variants, and long class strings can be harder to scan than named styles.
+- Best timing: before or alongside the Expo Router multi-page split, when most screens are written fresh.
+
+## Versions (npm, 2026-11-07)
+
+| Tag | Version | Tailwind | Notes |
+| --- | --- | --- | --- |
+| `latest` | 4.2.7 | v3 (`>3.3.0`) | Babel preset + `tailwind.config.js`. Verified consumer setup is Expo SDK 57 / RN 0.86; no SDK 58 verification found. |
+| `preview` / `rc` | 5.0.0-rc.1 | v4 (`>4.1.11`) | Peer dependency on `react-native-css@3.1.0-rc.1`. No Babel changes. |
+
+**Initial pick:** v5 RC, since it targets RN 0.81+ on the new architecture (matches SDK 58 / RN 0.88) and avoids a v4→v5 migration later.
+
+**Outcome (2026-11-07): using v4.2.7 on SDK 58.**
+
+- **v5 RC failed.** `react-native-css@3.1.0-rc.1` crashed while compiling Tailwind v4 output (`failed to deserialize; expected an object-like struct named Specifier`). Feeding the compiler Tailwind's own `preflight` and `@property` rules reproduced it. Switching from Node 25.2.1 to Node 24.22.2 didn't help.
+- **v4.2.7 works on SDK 58.** It needs `babel-preset-expo` and `react-native-css-interop` installed as direct dependencies. Without the first, Metro fails with a misleading `Cannot read properties of undefined (reading 'transformFile')`. Without the second, `react-native-css-interop/jsx-runtime` can't be resolved.
+- **SDK 57 downgrade not needed.** In a scratch copy it hit the same missing-Babel-preset error, which was the real cause.
+
+## v4 setup (what Fan Fit uses)
+
+```bash
+npx expo install nativewind@4.2.7 react-native-reanimated react-native-worklets
+npm install --save-exact react-native-css-interop@0.2.7
+npm install --save-dev --save-exact tailwindcss@3.4.17
+npx expo install --dev babel-preset-expo
+```
+
+- `babel.config.js`: presets `['babel-preset-expo', { jsxImportSource: 'nativewind' }]` and `'nativewind/babel'`
+- `metro.config.js`: `withNativeWind(getDefaultConfig(__dirname), { input: './global.css' })`
+- `tailwind.config.js`: `presets: [require('nativewind/preset')]`, `content` globs for `App.tsx` and `src/**`, theme tokens under `theme.extend`
+- `global.css`: `@tailwind base; @tailwind components; @tailwind utilities;`, imported once from `index.ts`
+- `nativewind-env.d.ts`: `/// <reference types="nativewind/types" />`
+- `global-css.d.ts`: `declare module '*.css';`. Expo's own declaration lives in the gitignored, auto-generated `expo-env.d.ts`, so `tsc` would fail on a fresh checkout without this file.
+- `active:` variants work on `Pressable` (used for ProfileCard's pressed state)
+
+The sections below describe v5 for reference when it reaches stable.
+
+## v5 requirements
+
+- Tailwind CSS v4.1+
+- React Native 0.81+ (new architecture)
+- React Native Reanimated v4+ (needs `react-native-worklets`)
+- `react-native-safe-area-context` (already installed)
+
+## v5 setup
+
+### Install
+
+```bash
+npx expo install nativewind@preview react-native-css@rc react-native-reanimated react-native-worklets
+npx expo install --dev tailwindcss @tailwindcss/postcss postcss
+```
+
+### `metro.config.js`
+
+```js
+const { getDefaultConfig } = require('expo/metro-config');
+const { withNativewind } = require('nativewind/metro');
+
+module.exports = withNativewind(getDefaultConfig(__dirname));
+```
+
+v5's `withNativewind` no longer takes an `input` argument (v4's `withNativeWind` did).
+
+### `postcss.config.mjs`
+
+```js
+export default {
+  plugins: {
+    '@tailwindcss/postcss': {},
+  },
+};
+```
+
+### `global.css`
+
+```css
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+
+@import "nativewind/theme";
+```
+
+Import it once from the app entry (`index.ts`).
+
+### `nativewind-env.d.ts`
+
+```ts
+/// <reference types="react-native-css/types" />
+```
+
+Generated by react-native-css. Commit it and don't edit it.
+
+### Babel
+
+No NativeWind preset or `jsxImportSource` is needed in v5. If a `babel.config.js` exists, it uses just `babel-preset-expo`.
+
+## Theming
+
+Tailwind v4 defines tokens in CSS with `@theme`, and each variable generates utilities:
+
+```css
+@theme {
+  --color-brand: #3b82f6;   /* bg-brand, text-brand, border-brand */
+  --spacing-18: 4.5rem;     /* p-18, m-18, gap-18 */
+}
+```
+
+To read a variable at runtime (e.g. dynamic theming), also define it under `:root`. JS can read it with `useUnstableNativeVariable('--color-brand')` from `nativewind`, but that API is marked unstable.
+
+### Token mapping from `src/theme.ts`
+
+| `theme.ts` | `@theme` variable | Example class |
+| --- | --- | --- |
+| `COLORS.background` `#0B0D0C` | `--color-background` | `bg-background` |
+| `COLORS.surface` `#151917` | `--color-surface` | `bg-surface` |
+| `COLORS.raised` | `--color-raised` | `bg-raised` |
+| `COLORS.selectedSurface` | `--color-selected-surface` | `bg-selected-surface` |
+| `COLORS.accent` | `--color-accent` | `text-accent` |
+| `COLORS.accentPressed` | `--color-accent-pressed` | `bg-accent-pressed` |
+| `COLORS.secondary` | `--color-secondary` | `border-secondary` |
+| `COLORS.border` | `--color-border` | `border-border` |
+| `COLORS.text` / `textMuted` / `textSubtle` / `textOnAccent` | `--color-text`, `--color-text-muted`, `--color-text-subtle`, `--color-text-on-accent` | `text-text-muted` |
+| `COLORS.overlay` | `--color-overlay` | `bg-overlay` |
+| `RADIUS.sm/md/lg` (8/14/18) | `--radius-sm/md/lg` | `rounded-lg` |
+| `RADIUS.pill` | Tailwind built-in | `rounded-full` |
+| `SPACING.screenX` (20) | `--spacing-screen-x` | `px-screen-x` |
+
+Until every component is migrated, `theme.ts` and `global.css` are two token sources and must stay in sync.
+
+## Repo gaps (as of 2026-11-07)
+
+- `react-native-reanimated` and `react-native-worklets` are not installed.
+- No `metro.config.js`, `babel.config.js` or `postcss.config.mjs` exist yet.
+- No `npm run build` script; use `npx expo export --platform ios` to check that the app bundles.
+
+## Risks
+
+- v5 is a release candidate: APIs may change before 5.0 stable. Pin exact versions.
+- Reanimated 4 is a native module, so a dev build needs a native rebuild (Expo Go on SDK 58 bundles it).
+- Two token sources (`theme.ts` + `global.css`) until the full migration.
+
+## Sources
+
+- NativeWind v5 docs: https://nativewind.dev/v5 (installation, configuration, theme, themes guide, migrate-from-v4)
+- NativeWind v4.2.7 `EXPO_SDK_57.md`: https://github.com/nativewind/nativewind/blob/nativewind@4.2.7/EXPO_SDK_57.md
+- npm: `npm view nativewind dist-tags`, `npm view nativewind@5.0.0-rc.1 peerDependencies`
