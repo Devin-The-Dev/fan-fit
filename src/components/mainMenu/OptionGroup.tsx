@@ -1,5 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { COLORS, RADIUS } from '../../theme';
+import { Pressable, Text, View } from 'react-native';
 
 export interface Option<T extends string | number> {
   key: T;
@@ -14,6 +13,21 @@ interface Props<T extends string | number> {
   wrap?: boolean;
 }
 
+const ITEM_BASE = 'items-center justify-center rounded-md border active:opacity-[0.85]';
+
+function itemClasses(isSegment: boolean, wrap: boolean, active: boolean): string {
+  const size = isSegment ? 'py-3.5' : 'py-2.5 px-1';
+  const layout = wrap ? 'flex-none px-[18px] rounded-full' : 'flex-1';
+  let colors = 'border-border bg-surface';
+  if (active) colors = isSegment ? 'border-accent bg-accent' : 'border-accent bg-selected-surface';
+  return `${ITEM_BASE} ${size} ${layout} ${colors}`;
+}
+
+function textClasses(isSegment: boolean, active: boolean): string {
+  if (isSegment) return `text-base font-bold ${active ? 'text-text-on-accent' : 'text-text-muted'}`;
+  return `text-[13px] font-semibold ${active ? 'text-accent' : 'text-text-muted'}`;
+}
+
 export function OptionGroup<T extends string | number>({
   options,
   value,
@@ -24,7 +38,7 @@ export function OptionGroup<T extends string | number>({
   const isSegment = variant === 'segment';
 
   return (
-    <View style={[styles.row, wrap && styles.rowWrap]} accessibilityRole="radiogroup">
+    <View className={`flex-row gap-2 ${wrap ? 'flex-wrap' : ''}`} accessibilityRole="radiogroup">
       {options.map((option) => {
         const active = option.key === value;
         return (
@@ -33,22 +47,9 @@ export function OptionGroup<T extends string | number>({
             onPress={() => onChange(option.key)}
             accessibilityRole="radio"
             accessibilityState={{ selected: active }}
-            style={({ pressed }) => [
-              styles.base,
-              isSegment ? styles.segment : styles.chip,
-              wrap && styles.wrapItem,
-              active && (isSegment ? styles.segmentActive : styles.chipActive),
-              pressed && styles.pressed,
-            ]}
+            className={itemClasses(isSegment, wrap, active)}
           >
-            <Text
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              style={[
-                isSegment ? styles.segmentText : styles.chipText,
-                active && (isSegment ? styles.segmentTextActive : styles.chipTextActive),
-              ]}
-            >
+            <Text numberOfLines={1} adjustsFontSizeToFit className={textClasses(isSegment, active)}>
               {option.label}
             </Text>
           </Pressable>
@@ -57,26 +58,3 @@ export function OptionGroup<T extends string | number>({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 8 },
-  rowWrap: { flexWrap: 'wrap' },
-  wrapItem: { flex: 0, paddingHorizontal: 18, borderRadius: RADIUS.pill },
-  base: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.surface,
-  },
-  chip: { paddingVertical: 10, paddingHorizontal: 4, borderRadius: RADIUS.md },
-  chipActive: { borderColor: COLORS.accent, backgroundColor: COLORS.selectedSurface },
-  segment: { paddingVertical: 14, borderRadius: RADIUS.md },
-  segmentActive: { borderColor: COLORS.accent, backgroundColor: COLORS.accent },
-  pressed: { opacity: 0.85 },
-  chipText: { color: COLORS.textMuted, fontSize: 13, fontWeight: '600' },
-  chipTextActive: { color: COLORS.accent },
-  segmentText: { color: COLORS.textMuted, fontSize: 16, fontWeight: '700' },
-  segmentTextActive: { color: COLORS.textOnAccent },
-});

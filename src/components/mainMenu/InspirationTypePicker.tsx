@@ -1,5 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { COLORS, RADIUS } from '../../theme';
+import { Pressable, Text, View } from 'react-native';
 import type { InspirationKind } from '../../types';
 
 export interface InspirationOption {
@@ -14,9 +13,12 @@ interface Props {
   onChange: (value: InspirationKind) => void;
 }
 
+const CARD_BASE = 'flex-1 items-center gap-2.5 pt-3.5 pb-4 px-1.5 min-h-[120px] rounded-lg active:opacity-[0.85]';
+const ICON_BOX_BASE = 'w-[52px] h-[52px] items-center justify-center rounded-md border-[1.5px] border-dashed';
+
 export function InspirationTypePicker({ options, value, onChange }: Props) {
   return (
-    <View style={styles.row} accessibilityRole="radiogroup">
+    <View className="flex-row gap-2" accessibilityRole="radiogroup">
       {options.map((option) => {
         const active = option.key === value;
         return (
@@ -26,48 +28,19 @@ export function InspirationTypePicker({ options, value, onChange }: Props) {
             accessibilityRole="radio"
             accessibilityState={{ selected: active }}
             accessibilityLabel={option.label}
-            style={({ pressed }) => [styles.card, active && styles.cardActive, pressed && styles.pressed]}
+            className={`${CARD_BASE} ${
+              active ? 'border-2 border-accent bg-selected-surface' : 'border border-border bg-surface'
+            }`}
           >
-            <View style={[styles.iconBox, active && styles.iconBoxActive]}>
-              <Text style={styles.icon}>{option.icon}</Text>
+            <View className={`${ICON_BOX_BASE} ${active ? 'border-secondary bg-raised' : 'border-text-subtle'}`}>
+              <Text className="text-2xl">{option.icon}</Text>
             </View>
-            <Text style={[styles.label, active && styles.labelActive]}>{option.label}</Text>
+            <Text className={`text-base font-bold text-center ${active ? 'text-accent' : 'text-text'}`}>
+              {option.label}
+            </Text>
           </Pressable>
         );
       })}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 8 },
-  card: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 10,
-    paddingTop: 14,
-    paddingBottom: 16,
-    paddingHorizontal: 6,
-    minHeight: 120,
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.surface,
-  },
-  cardActive: { borderWidth: 2, borderColor: COLORS.accent, backgroundColor: COLORS.selectedSurface },
-  pressed: { opacity: 0.85 },
-  iconBox: {
-    width: 52,
-    height: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: RADIUS.md,
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: COLORS.textSubtle,
-  },
-  iconBoxActive: { borderColor: COLORS.secondary, backgroundColor: COLORS.raised },
-  icon: { fontSize: 24 },
-  label: { color: COLORS.text, fontSize: 16, fontWeight: '700', textAlign: 'center' },
-  labelActive: { color: COLORS.accent },
-});

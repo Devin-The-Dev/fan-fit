@@ -1,4 +1,6 @@
 // Mirrors src/theme.ts. Keep both in sync until every component uses className.
+const { hairlineWidth } = require('nativewind/theme');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./App.tsx', './src/**/*.{ts,tsx}'],
@@ -27,6 +29,9 @@ module.exports = {
       },
       spacing: {
         'screen-x': '20px',
+      },
+      borderWidth: {
+        hairline: hairlineWidth(),
       },
     },
   },

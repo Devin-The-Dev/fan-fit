@@ -1,28 +1,15 @@
-import { StyleSheet, Text } from 'react-native';
-import { COLORS } from '../../theme';
+import { Text } from 'react-native';
 
 interface Props {
   children: string;
   variant?: 'section' | 'field';
 }
 
-export function SectionLabel({ children, variant = 'section' }: Props) {
-  return <Text style={variant === 'section' ? styles.section : styles.field}>{children}</Text>;
-}
+const VARIANT_CLASSES: Record<NonNullable<Props['variant']>, string> = {
+  section: 'mb-3 text-text text-sm font-bold tracking-[1px] uppercase',
+  field: 'mb-2 text-text-subtle text-sm font-semibold',
+};
 
-const styles = StyleSheet.create({
-  section: {
-    color: COLORS.text,
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: 12,
-  },
-  field: {
-    color: COLORS.textSubtle,
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-});
+export function SectionLabel({ children, variant = 'section' }: Props) {
+  return <Text className={VARIANT_CLASSES[variant]}>{children}</Text>;
+}
