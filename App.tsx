@@ -24,7 +24,7 @@ import { ProfileSheet } from './src/components/mainMenu/ProfileSheet';
 import { SectionLabel } from './src/components/mainMenu/SectionLabel';
 import { RoutineCard } from './src/components/workout/RoutineCard';
 import { generateWorkout } from './src/generateWorkout';
-import { COLORS, RADIUS, SPACING } from './src/theme';
+import { COLORS, SPACING } from './src/theme';
 import type {
   ActivityLevel,
   Exercise,
@@ -146,11 +146,11 @@ function HomeBody() {
           <ProfileCard summary={`Your profile · ${genderLabel}, ${age}`} onEdit={() => setProfileOpen(true)} />
         </View>
 
-        <View style={styles.section}>
+        <View className="mb-7">
           <SectionLabel>Workout session</SectionLabel>
           <SectionLabel variant="field">Activity level</SectionLabel>
           <OptionGroup options={ACTIVITY_LEVELS} value={activityLevel} onChange={setActivityLevel} />
-          <View style={styles.fieldGap} />
+          <View className="h-[18px]" />
           <SectionLabel variant="field">Workout length</SectionLabel>
           <OptionGroup
             options={WORKOUT_DURATIONS}
@@ -160,7 +160,7 @@ function HomeBody() {
           />
         </View>
 
-        <View style={styles.section}>
+        <View className="mb-7">
           <SectionLabel>Inspiration type</SectionLabel>
           <InspirationTypePicker options={KINDS} value={kind} onChange={setKind} />
         </View>
@@ -172,7 +172,7 @@ function HomeBody() {
           placeholder={KIND_HINTS[kind]}
           placeholderTextColor={COLORS.textSubtle}
           selectionColor={COLORS.accent}
-          style={styles.input}
+          className="p-[18px] rounded-lg border border-border bg-surface text-text text-[18px]"
           autoCapitalize="words"
           autoCorrect
           returnKeyType="done"
@@ -189,13 +189,16 @@ function HomeBody() {
         )}
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+      <View
+        className="px-screen-x pt-3 bg-background border-t-hairline border-border"
+        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+      >
         <Pressable
           onPress={generate}
           accessibilityRole="button"
-          style={({ pressed }) => [styles.primaryBtn, pressed && styles.primaryBtnPressed]}
+          className="py-[18px] items-center rounded-lg bg-accent active:bg-accent-pressed"
         >
-          <Text style={styles.primaryBtnText}>Generate routine</Text>
+          <Text className="text-text-on-accent text-[18px] font-extrabold">Generate routine</Text>
         </Pressable>
       </View>
 
@@ -249,30 +252,4 @@ const styles = StyleSheet.create({
   title: { color: COLORS.text, fontSize: 32, fontWeight: '800', lineHeight: 38, marginBottom: 10 },
   lede: { color: COLORS.textMuted, fontSize: 17, lineHeight: 24 },
   section: { marginBottom: 28 },
-  fieldGap: { height: 18 },
-  input: {
-    backgroundColor: COLORS.surface,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: RADIUS.lg,
-    paddingHorizontal: 18,
-    paddingVertical: 18,
-    fontSize: 18,
-    color: COLORS.text,
-  },
-  footer: {
-    paddingHorizontal: SPACING.screenX,
-    paddingTop: 12,
-    backgroundColor: COLORS.background,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: COLORS.border,
-  },
-  primaryBtn: {
-    backgroundColor: COLORS.accent,
-    paddingVertical: 18,
-    borderRadius: RADIUS.lg,
-    alignItems: 'center',
-  },
-  primaryBtnPressed: { backgroundColor: COLORS.accentPressed },
-  primaryBtnText: { color: COLORS.textOnAccent, fontSize: 18, fontWeight: '800' },
 });

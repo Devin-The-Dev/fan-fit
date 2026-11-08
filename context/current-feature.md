@@ -1,17 +1,30 @@
-# Current Feature
-<!-- Feature name and short description -->
+# Current Feature: NativeWind for Workout Generation
+
+Convert the workout generation UI (generator inputs and the generated routine) from `StyleSheet` to NativeWind `className`.
 
 ## Status
 
-<!-- Not Started | In Progress | Completed -->
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- Convert the generator inputs to `className`:
+  - `src/components/mainMenu/SectionLabel.tsx`
+  - `src/components/mainMenu/OptionGroup.tsx` (selected and pressed states)
+  - `src/components/mainMenu/InspirationTypePicker.tsx` (selected and pressed states)
+  - In `App.tsx`: the Workout session, Inspiration type and inspiration name sections, the text input, the footer and the Generate button
+- Convert the generated routine: `src/components/workout/RoutineCard.tsx`
+- Use theme tokens from `tailwind.config.js` only; add any missing tokens there and in `src/theme.ts`
+- Remove `StyleSheet` entries and theme imports that are no longer used
+- Verify: `npx tsc --noEmit`, `npx expo export --platform ios`, then check on the iOS simulator
 
 ## Notes
 
-<!-- Any extra notes -->
+- Out of scope (stay on `StyleSheet`): the hero section and screen wrappers in `App.tsx`, `ProfileSheet`, `ExerciseVideoPlayer`
+- The footer's bottom padding comes from safe-area insets, so it stays an inline style (computed at runtime)
+- Use `active:` variants for pressed states, as in `ProfileCard`
+- Exact visual match isn't required; layouts will be redesigned later
+- NativeWind setup and gotchas: `context/research/nativewind.md`
 
 ## History
 
