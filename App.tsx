@@ -30,11 +30,12 @@ import type {
   Exercise,
   Gender,
   InspirationKind,
+  ProfileDetails,
   UserProfile,
   WorkoutDuration,
   WorkoutRoutine,
 } from './src/types';
-import { DEFAULT_PROFILE } from './src/types';
+import { DEFAULT_PROFILE, DEFAULT_PROFILE_DETAILS } from './src/types';
 
 interface ActiveVideo {
   title: string;
@@ -57,8 +58,10 @@ const GENDERS: Option<Gender>[] = [
   { key: 'female', label: 'Female' },
   { key: 'male', label: 'Male' },
   { key: 'non_binary', label: 'Non-binary' },
-  { key: 'prefer_not_to_say', label: 'Prefer not to say' },
+  { key: 'prefer_not_to_say', label: 'Unknown' },
 ];
+
+const PROFILE_SHEET_GENDERS = GENDERS.filter((option) => option.key === 'female' || option.key === 'male');
 
 const ACTIVITY_LEVELS: Option<ActivityLevel>[] = [
   { key: 'sedentary', label: 'Sedentary' },
@@ -86,8 +89,7 @@ function HomeBody() {
   const scrollRef = useRef<ScrollViewInstance>(null);
   const [kind, setKind] = useState<InspirationKind>('sport');
   const [name, setName] = useState('');
-  const [age, setAge] = useState(DEFAULT_PROFILE.age);
-  const [gender, setGender] = useState<Gender>(DEFAULT_PROFILE.gender);
+  const [details, setDetails] = useState<ProfileDetails>(DEFAULT_PROFILE_DETAILS);
   const [activityLevel, setActivityLevel] = useState<ActivityLevel>(DEFAULT_PROFILE.activityLevel);
   const [durationMinutes, setDurationMinutes] = useState<WorkoutDuration>(DEFAULT_PROFILE.durationMinutes);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -98,10 +100,10 @@ function HomeBody() {
   const [activeVideo, setActiveVideo] = useState<ActiveVideo | null>(null);
 
   const profile = useMemo<UserProfile>(
-    () => ({ age, gender, activityLevel, durationMinutes }),
-    [age, gender, activityLevel, durationMinutes]
+    () => ({ ...details, activityLevel, durationMinutes }),
+    [details, activityLevel, durationMinutes]
   );
-  const genderLabel = GENDERS.find((g) => g.key === gender)?.label ?? '';
+  const genderLabel = GENDERS.find((g) => g.key === details.gender)?.label ?? '';
 
   const generate = () => {
     setPendingRoutineScroll(true);
@@ -143,7 +145,7 @@ function HomeBody() {
 
         <View style={styles.section}>
           <SectionLabel>Profile</SectionLabel>
-          <ProfileCard summary={`Your profile · ${genderLabel}, ${age}`} onEdit={() => setProfileOpen(true)} />
+          <ProfileCard summary={`Your profile · ${genderLabel}, ${details.age}`} onEdit={() => setProfileOpen(true)} />
         </View>
 
         <View className="mb-7">
@@ -204,11 +206,9 @@ function HomeBody() {
 
       <ProfileSheet
         visible={profileOpen}
-        age={age}
-        gender={gender}
-        genderOptions={GENDERS}
-        onChangeAge={setAge}
-        onChangeGender={setGender}
+        details={details}
+        genderOptions={PROFILE_SHEET_GENDERS}
+        onSave={setDetails}
         onClose={() => setProfileOpen(false)}
       />
 
