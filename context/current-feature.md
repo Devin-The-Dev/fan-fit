@@ -1,27 +1,17 @@
 # Current Feature
-
-Database setup (Drizzle + Neon + Hyperdrive)
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+<!-- Not Started | In Progress | Completed -->
 
 ## Goals
 
-- Postgres database on Neon
-- `worker/` Cloudflare Worker project, separate from the Expo app
-- Drizzle schema for `users`, `workouts` and `exercise_cache` from the data model in `context/project-overview.md`
-- First migration generated with `drizzle-kit generate` and applied with `drizzle-kit migrate`
-- Hyperdrive config bound to the Worker as `HYPERDRIVE`
-- `GET /health` route that runs `select 1` through Hyperdrive
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Research: `context/research/drizzle.md`
-- Use `pg` (node-postgres); Postgres.js isn't supported with Hyperdrive
-- Give Hyperdrive Neon's direct (non-pooled) connection string
-- Credentials live only in gitignored `worker/.env.prod` and in local env vars, never in committed files
-- Never use `drizzle-kit push`
+<!-- Any extra notes -->
 
 ## History
 
@@ -44,3 +34,4 @@ In Progress
 - 2026-11-08: Converted the workout generation UI to NativeWind `className`: `SectionLabel`, `OptionGroup`, `InspirationTypePicker`, `RoutineCard`, and the generator sections, text input, footer and Generate button in `App.tsx`. Added a `hairline` border width to `tailwind.config.js`. The Profile section's `styles.section` is left on the back burner.
 - 2026-11-10: Redesigned the Profile sheet to match `ProfileMenu.png`: added name, Metric/Imperial units, and height and weight steppers (stored in metric, converted for display in `src/lib/units.ts`), with empty slots reserved for the future BMI and Target Heart Rate panels. Split the sheet into `ProfileSheet`, `ProfileForm` and a reusable `Stepper`, all on NativeWind. Done saves the profile, and closing with unsaved changes asks to discard them. The sheet offers only Female and Male, and "Prefer not to say" is now labeled "Unknown". Tested in the iOS simulator.
 - 2026-11-11: Added the BMI panel to the Profile sheet (`src/lib/bmi.ts`, `BmiPanel`): live BMI to one decimal, category (Normal in the accent color, others muted) and healthy weight range in kg or lb, plus the BMI disclaimer below Height and Weight. Range edges are adjusted to agree with the category (69 in shows 125–168 lb, and 169 lb is Overweight), and BMI is calculated from the values shown in the steppers. Under 20, the panel shows only the BMI with "Adult ranges don't apply under 20." at the same size. Lowered the weight stepper minimum to 18 kg / 40 lb so every healthy range is reachable. Every stepper combination was checked in both unit systems. Tested in the iOS simulator.
+- 2026-11-11: Set up the Postgres database on Neon with Drizzle ORM in a new `worker/` Cloudflare Worker package (Hono, `pg`). Added the schema for `users`, `workouts` and `exercise_cache`, with enums and gender as `female`, `male`, `unknown` (the app's `Gender` type was changed to match), and applied the `0000_init` migration. Created Hyperdrive config `fan-fit-db`, bound as `HYPERDRIVE`, and tested a `GET /health` route through it locally. Deploying and the app API client are on the back burner. Research saved in `context/research/drizzle.md`.
