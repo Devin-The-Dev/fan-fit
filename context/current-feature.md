@@ -1,38 +1,17 @@
-# Current Feature: Profile Menu
-
-Redesign the Profile bottom sheet (`src/components/mainMenu/ProfileSheet.tsx`) to match `context/screenshots/ProfileMenu.png`, adding name, units, height and weight to the existing age and gender controls. Spec: `context/features/profile-menu-spec.md`.
+# Current Feature
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+<!-- Not Started | In Progress | Completed -->
 
 ## Goals
 
-Use `context/screenshots/ProfileMenu.png` as the visual reference for layout, spacing and sizing.
-
-- The sheet slides up over the dimmed main menu from the `PROFILE` card's `Edit ›`. The menu header and profile card stay visible above it, and the sheet has rounded top corners and a 1px top border
-- Header shows a bold "Profile" title on the left and a muted ✕ on the right that closes the sheet
-- Name field: muted "Name" label, then a full-width rounded input with a 1px border and the placeholder "Your name"
-- Age row: `−` / large bold value / `+` stepper on the left with square, bordered, accent-symbol buttons. Keep the 13–90 limits and disable the button at a limit
-- Units: two separate equal-width rounded buttons, Metric and Imperial, with a gap between them. The selected button has a solid accent fill and dark bold text; the other is outlined with muted text
-- Switching units converts the displayed height and weight and changes the labels between "Height (cm)" / "Height (in)" and "Weight (kg)" / "Weight (lb)"
-- Height and Weight steppers are stacked in the left column, in the same style as Age
-- Gender: pill chips for Female and Male. The selected chip has a dark accent fill, accent border and accent text; the other is outlined with muted text
-- Full-width "Done" button with solid accent fill, rounded corners and a bold dark label, which saves the profile and closes the sheet
-- Closing the sheet with unsaved changes (✕, backdrop tap or Android back) shows a "Discard changes?" alert with Keep editing and Discard options. Without changes, the sheet closes straight away
-- Reserved empty, fixed-width slots in the right column next to Age (Target Heart Rate) and spanning Height + Weight (BMI), sized so the left column matches the screenshot
-- `UserProfile` gains `name`, `heightCm`, `weightKg` and `units`, with `DEFAULT_PROFILE` values `''`, `175`, `70` and `'metric'`
-- `ProfileSheet` is converted to NativeWind `className` using only theme tokens
+<!-- Goals and requirements -->
 
 ## Notes
 
-- The screenshot's lime green stands in for the project accent color; don't hard-code it.
-- The BMI panel, Target Heart Rate panel and the BMI disclaimer paragraph shown in the screenshot are out of scope. Their slots stay empty, with no border or placeholder text.
-- The spec's slot table lists the BMI disclaimer below Height + Weight, but the Reserved Slots section only reserves the two panel slots. No gap is reserved for the disclaimer; adding it later will push Gender and Done down.
-- Store height and weight in metric only and convert for display, so later features (BMI, workout scaling) work in one unit.
-- `Gender` keeps its existing type; the sheet only shows Female and Male.
-- Persisting the profile between launches is out of scope.
-- Theme tokens live in both `tailwind.config.js` and `src/theme.ts`; keep them in sync if any are added.
+<!-- Any extra notes -->
 
 ## History
 
@@ -53,3 +32,4 @@ Use `context/screenshots/ProfileMenu.png` as the visual reference for layout, sp
 - 2026-11-05: Switched the background and cards to neutral near-black to remove the green tint; palette colors now used for accents, selected fills, pressed states and borders. Removed the color theme item from `context/back-burner.md`.
 - 2026-11-07: Added NativeWind v4.2.7 (Tailwind CSS 3) on SDK 58: `babel.config.js`, `metro.config.js`, `tailwind.config.js` with theme tokens mirroring `src/theme.ts`, `global.css`, and type declarations. Converted `ProfileCard` to `className` as the pilot. NativeWind v5 RC was tried first but failed to compile Tailwind v4 output, so it's on the back burner. Research saved in `context/research/nativewind.md`.
 - 2026-11-08: Converted the workout generation UI to NativeWind `className`: `SectionLabel`, `OptionGroup`, `InspirationTypePicker`, `RoutineCard`, and the generator sections, text input, footer and Generate button in `App.tsx`. Added a `hairline` border width to `tailwind.config.js`. The Profile section's `styles.section` is left on the back burner.
+- 2026-11-10: Redesigned the Profile sheet to match `ProfileMenu.png`: added name, Metric/Imperial units, and height and weight steppers (stored in metric, converted for display in `src/lib/units.ts`), with empty slots reserved for the future BMI and Target Heart Rate panels. Split the sheet into `ProfileSheet`, `ProfileForm` and a reusable `Stepper`, all on NativeWind. Done saves the profile, and closing with unsaved changes asks to discard them. The sheet offers only Female and Male, and "Prefer not to say" is now labeled "Unknown". Tested in the iOS simulator.
