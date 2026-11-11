@@ -1,6 +1,6 @@
 export type InspirationKind = 'sport' | 'celebrity' | 'character';
 
-export type Gender = 'female' | 'male' | 'non_binary' | 'prefer_not_to_say';
+export type Gender = 'female' | 'male' | 'unknown';
 
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
 
@@ -24,7 +24,7 @@ export type ProfileDetails = Pick<UserProfile, 'name' | 'age' | 'gender' | 'unit
 export const DEFAULT_PROFILE_DETAILS: ProfileDetails = {
   name: '',
   age: 30,
-  gender: 'prefer_not_to_say',
+  gender: 'unknown',
   units: 'metric',
   heightCm: 175,
   weightKg: 70,

@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "fan-fit-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "upload_source_maps": true,
+  "observability": { "enabled": true },
+  // Local dev reads CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE instead, so no credentials live here.
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "9170326f4ad84006bc45a1202384baf1"
+    }
+  ]
+}
