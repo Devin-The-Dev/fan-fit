@@ -1,4 +1,4 @@
-import { TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 import {
   HEIGHT_RANGE,
   HEIGHT_UNIT_LABEL,
@@ -11,12 +11,16 @@ import {
 } from '../../lib/units';
 import { COLORS } from '../../theme';
 import type { Gender, ProfileDetails, UnitSystem } from '../../types';
+import { BmiPanel } from './BmiPanel';
 import { type Option, OptionGroup } from './OptionGroup';
 import { SectionLabel } from './SectionLabel';
 import { Stepper } from './Stepper';
 
 const MIN_AGE = 13;
 const MAX_AGE = 90;
+
+const BMI_DISCLAIMER =
+  "BMI is a rough estimate and doesn't account for muscle mass, bone density, or body composition. If this number doesn't feel right for you, consider checking in with a personal trainer.";
 
 const UNIT_OPTIONS: Option<UnitSystem>[] = [
   { key: 'metric', label: 'Metric' },
@@ -33,28 +37,30 @@ function BodyMeasurements({ draft, onChange }: Omit<Props, 'genderOptions'>) {
   const { units } = draft;
 
   return (
-    <View className="flex-row justify-between gap-3 mb-5">
-      <View>
-        <SectionLabel variant="field">{`Height (${HEIGHT_UNIT_LABEL[units]})`}</SectionLabel>
-        <Stepper
-          label="height"
-          value={heightForDisplay(draft.heightCm, units)}
-          unit={HEIGHT_UNIT_LABEL[units]}
-          {...HEIGHT_RANGE[units]}
-          onChange={(value) => onChange({ heightCm: heightToCm(value, units) })}
-        />
-        <View className="h-3" />
-        <SectionLabel variant="field">{`Weight (${WEIGHT_UNIT_LABEL[units]})`}</SectionLabel>
-        <Stepper
-          label="weight"
-          value={weightForDisplay(draft.weightKg, units)}
-          unit={WEIGHT_UNIT_LABEL[units]}
-          {...WEIGHT_RANGE[units]}
-          onChange={(value) => onChange({ weightKg: weightToKg(value, units) })}
-        />
+    <View className="mb-5">
+      <View className="flex-row justify-between gap-3 mb-3">
+        <View>
+          <SectionLabel variant="field">{`Height (${HEIGHT_UNIT_LABEL[units]})`}</SectionLabel>
+          <Stepper
+            label="height"
+            value={heightForDisplay(draft.heightCm, units)}
+            unit={HEIGHT_UNIT_LABEL[units]}
+            {...HEIGHT_RANGE[units]}
+            onChange={(value) => onChange({ heightCm: heightToCm(value, units) })}
+          />
+          <View className="h-3" />
+          <SectionLabel variant="field">{`Weight (${WEIGHT_UNIT_LABEL[units]})`}</SectionLabel>
+          <Stepper
+            label="weight"
+            value={weightForDisplay(draft.weightKg, units)}
+            unit={WEIGHT_UNIT_LABEL[units]}
+            {...WEIGHT_RANGE[units]}
+            onChange={(value) => onChange({ weightKg: weightToKg(value, units) })}
+          />
+        </View>
+        <BmiPanel heightCm={draft.heightCm} weightKg={draft.weightKg} age={draft.age} units={units} />
       </View>
-      {/* Reserved for the BMI panel */}
-      <View className="w-[128px]" />
+      <Text className="text-text-muted text-xs leading-[18px]">{BMI_DISCLAIMER}</Text>
     </View>
   );
 }

@@ -1,17 +1,33 @@
-# Current Feature
-<!-- Feature name and short description -->
+# Current Feature: BMI Calculator
+
+Fill the reserved BMI slot in the Profile sheet with a live BMI panel and add the BMI disclaimer below the Height and Weight steppers. Spec: `context/features/bmi-calculator-spec.md`.
 
 ## Status
 
-<!-- Not Started | In Progress | Completed -->
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+Use `context/screenshots/ProfileMenu.png` as the visual reference for the panel and disclaimer.
+
+- A BMI panel replaces the empty slot to the right of the Height and Weight steppers, spanning both steppers at the slot's current width so the steppers don't move
+- The panel is a rounded card with a 1px border and a slightly raised background, with centered text: a small muted uppercase "BMI" label, the BMI to one decimal in large bold text, the category in bold, a 1px divider, a small muted uppercase "Healthy range" label, and the range in bold
+- BMI is `weight (kg) / height (m)²`, rounded to one decimal, calculated from the whole-number height and weight shown in the steppers (converted to metric) so it always matches what the user sees. It updates live from the sheet's draft as the steppers change
+- The category comes from the rounded BMI: below 18.5 Underweight, 18.5–24.9 Normal, 25.0–29.9 Overweight, 30.0 and up Obese. Normal uses the accent color, and the others use muted text
+- The healthy range is the lightest to heaviest whole-number weight in the selected unit (kg in Metric, lb in Imperial) that shows a Normal BMI. It starts from `18.5 × height²` and `24.9 × height²` (height in meters), and each end is adjusted until it agrees with the category, so the first weight outside the range always changes the category. 70 kg at 175 cm shows BMI 22.9, Normal, 57–76 kg (125–168 lb); at 69 in the range is 125–168 lb, and 169 lb shows Overweight
+- The weight stepper minimum is 18 kg / 40 lb, so the healthy range for every allowed height (shortest: 100 cm / 40 in) can be reached
+- Under age 20, the panel shows only the label and BMI value, with the muted note "Adult ranges don't apply under 20." in place of the category, divider and range. The panel keeps the same size
+- The disclaimer sits full width below the Height + Weight row and above Gender, in small muted text, for all ages: "BMI is a rough estimate and doesn't account for muscle mass, bone density, or body composition. If this number doesn't feel right for you, consider checking in with a personal trainer."
+- Calculations live in `src/lib/bmi.ts` as pure functions, and the panel is a new `src/components/mainMenu/BmiPanel.tsx` that takes `heightCm`, `weightKg`, `age` and `units`
+- NativeWind `className` with existing theme tokens only
 
 ## Notes
 
-<!-- Any extra notes -->
+- The screenshot's lime green stands in for the project accent color; don't hard-code it.
+- Height and weight are already stored in metric. Reuse `weightForDisplay` and `WEIGHT_UNIT_LABEL` from `src/lib/units.ts` for the range in kg or lb.
+- BMI isn't saved to the profile; it's always calculated from height and weight.
+- Out of scope: the Target Heart Rate panel (its slot next to Age stays empty), using BMI in workout generation or volume scaling, and growth percentile charts for users under 20.
+- Adding the disclaimer pushes Gender and Done down, as expected from the Profile Menu feature.
 
 ## History
 

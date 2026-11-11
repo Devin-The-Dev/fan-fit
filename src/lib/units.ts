@@ -13,9 +13,11 @@ export const HEIGHT_RANGE: Record<UnitSystem, MeasurementRange> = {
   imperial: { min: 40, max: 98 },
 };
 
+// The minimum sits below the lowest healthy weight for the shortest allowed height (19 kg / 42 lb at 100 cm / 40 in),
+// so every height's healthy BMI range can be reached with the stepper.
 export const WEIGHT_RANGE: Record<UnitSystem, MeasurementRange> = {
-  metric: { min: 30, max: 250 },
-  imperial: { min: 66, max: 551 },
+  metric: { min: 18, max: 250 },
+  imperial: { min: 40, max: 551 },
 };
 
 export const HEIGHT_UNIT_LABEL: Record<UnitSystem, string> = { metric: 'cm', imperial: 'in' };
