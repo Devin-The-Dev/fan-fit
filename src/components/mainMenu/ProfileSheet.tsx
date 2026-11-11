@@ -1,141 +1,96 @@
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { COLORS, RADIUS, SPACING } from '../../theme';
-import type { Gender } from '../../types';
-import { type Option, OptionGroup } from './OptionGroup';
-import { SectionLabel } from './SectionLabel';
-
-const MIN_AGE = 13;
-const MAX_AGE = 90;
+import { isSameHeight, isSameWeight } from '../../lib/units';
+import type { Gender, ProfileDetails } from '../../types';
+import type { Option } from './OptionGroup';
+import { ProfileForm } from './ProfileForm';
 
 interface Props {
   visible: boolean;
-  age: number;
-  gender: Gender;
+  details: ProfileDetails;
   genderOptions: Option<Gender>[];
-  onChangeAge: (age: number) => void;
-  onChangeGender: (gender: Gender) => void;
+  onSave: (details: ProfileDetails) => void;
   onClose: () => void;
 }
 
-interface StepButtonProps {
-  label: string;
-  symbol: string;
-  disabled: boolean;
-  onPress: () => void;
-}
+const DISCARD_TITLE = 'Discard changes?';
+const DISCARD_MESSAGE = "Your profile changes won't be saved if you close now.";
 
-function StepButton({ label, symbol, disabled, onPress }: StepButtonProps) {
+function hasChanges(draft: ProfileDetails, saved: ProfileDetails): boolean {
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={({ pressed }) => [styles.stepBtn, pressed && styles.stepBtnPressed, disabled && styles.disabled]}
-    >
-      <Text style={styles.stepSymbol}>{symbol}</Text>
-    </Pressable>
+    draft.name !== saved.name ||
+    draft.age !== saved.age ||
+    draft.gender !== saved.gender ||
+    draft.units !== saved.units ||
+    !isSameHeight(draft.heightCm, saved.heightCm) ||
+    !isSameWeight(draft.weightKg, saved.weightKg)
   );
 }
 
-export function ProfileSheet({
-  visible,
-  age,
-  gender,
-  genderOptions,
-  onChangeAge,
-  onChangeGender,
-  onClose,
-}: Props) {
+function confirmDiscard(onDiscard: () => void) {
+  // react-native-web's Alert is a no-op, so the web build uses the browser's confirm dialog.
+  if (Platform.OS === 'web') {
+    if (globalThis.confirm(`${DISCARD_TITLE}\n\n${DISCARD_MESSAGE}`)) onDiscard();
+    return;
+  }
+  Alert.alert(DISCARD_TITLE, DISCARD_MESSAGE, [
+    { text: 'Keep editing', style: 'cancel' },
+    { text: 'Discard', style: 'destructive', onPress: onDiscard },
+  ]);
+}
+
+export function ProfileSheet({ visible, details, genderOptions, onSave, onClose }: Props) {
   const insets = useSafeAreaInsets();
+  const [draft, setDraft] = useState(details);
+  const [wasVisible, setWasVisible] = useState(visible);
+
+  // Reset the draft during render when the sheet opens, so the first frame never shows discarded edits.
+  if (visible !== wasVisible) {
+    setWasVisible(visible);
+    if (visible) setDraft(details);
+  }
+
+  const updateDraft = (patch: Partial<ProfileDetails>) => setDraft((current) => ({ ...current, ...patch }));
+
+  const save = () => {
+    onSave(draft);
+    onClose();
+  };
+
+  const requestClose = () => {
+    if (hasChanges(draft, details)) confirmDiscard(onClose);
+    else onClose();
+  };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <Pressable style={styles.dismissArea} onPress={onClose} accessibilityLabel="Close profile" />
-        <View style={[styles.sheet, { paddingBottom: insets.bottom + 16 }]}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Profile</Text>
-            <Pressable onPress={onClose} hitSlop={12} accessibilityRole="button" accessibilityLabel="Close">
-              <Text style={styles.close}>✕</Text>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={requestClose}>
+      <View className="flex-1 justify-end bg-overlay">
+        <Pressable className="flex-1" onPress={requestClose} accessibilityLabel="Close profile" />
+        <View
+          className="max-h-[92%] px-screen-x pt-6 rounded-t-[28px] border-t border-border bg-background"
+          style={{ paddingBottom: insets.bottom + 16 }}
+        >
+          <View className="flex-row items-center justify-between mb-5">
+            <Text className="text-text text-[22px] font-extrabold">Profile</Text>
+            <Pressable onPress={requestClose} hitSlop={12} accessibilityRole="button" accessibilityLabel="Close">
+              <Text className="text-text-muted text-[20px]">✕</Text>
             </Pressable>
           </View>
 
-          <SectionLabel variant="field">Age</SectionLabel>
-          <View style={styles.stepper}>
-            <StepButton
-              label="Decrease age"
-              symbol="−"
-              disabled={age <= MIN_AGE}
-              onPress={() => onChangeAge(Math.max(MIN_AGE, age - 1))}
-            />
-            <Text style={styles.stepValue}>{age}</Text>
-            <StepButton
-              label="Increase age"
-              symbol="+"
-              disabled={age >= MAX_AGE}
-              onPress={() => onChangeAge(Math.min(MAX_AGE, age + 1))}
-            />
-          </View>
-
-          <SectionLabel variant="field">Gender</SectionLabel>
-          <OptionGroup options={genderOptions} value={gender} onChange={onChangeGender} wrap />
+          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <ProfileForm draft={draft} genderOptions={genderOptions} onChange={updateDraft} />
+          </ScrollView>
 
           <Pressable
-            onPress={onClose}
-            style={({ pressed }) => [styles.doneBtn, pressed && styles.doneBtnPressed]}
+            onPress={save}
+            accessibilityRole="button"
+            className="mt-6 py-[18px] items-center rounded-lg bg-accent active:bg-accent-pressed"
           >
-            <Text style={styles.doneText}>Done</Text>
+            <Text className="text-text-on-accent text-[18px] font-extrabold">Done</Text>
           </Pressable>
         </View>
       </View>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: COLORS.overlay, justifyContent: 'flex-end' },
-  dismissArea: { flex: 1 },
-  sheet: {
-    backgroundColor: COLORS.background,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    borderTopWidth: 1,
-    borderColor: COLORS.border,
-    paddingHorizontal: SPACING.screenX,
-    paddingTop: 24,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: { color: COLORS.text, fontSize: 22, fontWeight: '800' },
-  close: { color: COLORS.textMuted, fontSize: 20 },
-  stepper: { flexDirection: 'row', alignItems: 'center', gap: 20, marginBottom: 24 },
-  stepBtn: {
-    width: 52,
-    height: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: RADIUS.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.surface,
-  },
-  stepBtnPressed: { borderColor: COLORS.secondary, backgroundColor: COLORS.raised },
-  disabled: { opacity: 0.4 },
-  stepSymbol: { color: COLORS.accent, fontSize: 24, fontWeight: '700' },
-  stepValue: { color: COLORS.text, fontSize: 32, fontWeight: '700', minWidth: 48, textAlign: 'center' },
-  doneBtn: {
-    marginTop: 28,
-    paddingVertical: 18,
-    borderRadius: RADIUS.lg,
-    alignItems: 'center',
-    backgroundColor: COLORS.accent,
-  },
-  doneBtnPressed: { backgroundColor: COLORS.accentPressed },
-  doneText: { color: COLORS.textOnAccent, fontSize: 18, fontWeight: '800' },
-});
