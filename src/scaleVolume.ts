@@ -105,8 +105,7 @@ export function scaleExerciseDetail(detail: string, scale: number): string {
 const GENDER_LABEL: Record<UserProfile['gender'], string> = {
   female: 'woman',
   male: 'man',
-  non_binary: 'non-binary',
-  prefer_not_to_say: 'your profile',
+  unknown: 'your profile',
 };
 
 const ACTIVITY_LABEL: Record<UserProfile['activityLevel'], string> = {
@@ -122,7 +121,7 @@ export function buildTailoringLabel(profile: UserProfile, scale: number): string
     scale < 0.75 ? 'gentler volume' : scale < 0.95 ? 'moderate volume' : scale > 1.1 ? 'higher volume' : 'balanced volume';
 
   const genderPart =
-    profile.gender === 'prefer_not_to_say'
+    profile.gender === 'unknown'
       ? ''
       : ` · ${GENDER_LABEL[profile.gender]}-informed pacing`;
 

@@ -57,8 +57,7 @@ const KIND_HINTS: Record<InspirationKind, string> = {
 const GENDERS: Option<Gender>[] = [
   { key: 'female', label: 'Female' },
   { key: 'male', label: 'Male' },
-  { key: 'non_binary', label: 'Non-binary' },
-  { key: 'prefer_not_to_say', label: 'Unknown' },
+  { key: 'unknown', label: 'Unknown' },
 ];
 
 const PROFILE_SHEET_GENDERS = GENDERS.filter((option) => option.key === 'female' || option.key === 'male');

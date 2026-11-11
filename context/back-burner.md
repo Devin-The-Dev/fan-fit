@@ -20,3 +20,9 @@ Ideas and upgrades saved for a later update or feature.
   - Remove `src/exerciseVideos.ts`, `src/components/ExerciseVideoPlayer.tsx`, and the `react-native-youtube-iframe` / `react-native-webview` dependencies
   - Match each exercise to an ExerciseDB entry and show its GIF in the workout view
   - Cache GIFs on Cloudflare R2 / CDN (requires the Worker backend)
+- **Cloudflare Worker backend:** the database is set up and Hyperdrive config `fan-fit-db` is bound to the Worker. `worker/` has a Hono app with a `GET /health` route that was tested locally only. Still to do:
+  - Deploy with `npm --prefix worker run deploy` once the app has something to call (sign-in or Gemini generation). Start on `*.workers.dev`; a custom domain like `api.<domain>` can come later.
+  - Add a typed API client in `src/lib/` pointing at the Worker URL.
+  - Hyperdrive caches read queries for about 60s by default. Before building the free-tier credit check, turn caching off for `fan-fit-db` or read `monthly_generations_used` from the same query that updates it, so the limit never acts on a stale count.
+  - Make `npm run dev` set `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` from `worker/.env.prod`, instead of exporting it by hand.
+  - `worker/.env` and `worker/.env.dev` still hold the placeholder template. drizzle-kit loads `.env` on its own, so put real values there only on purpose, for example once a Neon dev branch exists.

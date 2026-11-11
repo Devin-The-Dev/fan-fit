@@ -1,17 +1,27 @@
 # Current Feature
-<!-- Feature name and short description -->
+
+Database setup (Drizzle + Neon + Hyperdrive)
 
 ## Status
 
-<!-- Not Started | In Progress | Completed -->
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- Postgres database on Neon
+- `worker/` Cloudflare Worker project, separate from the Expo app
+- Drizzle schema for `users`, `workouts` and `exercise_cache` from the data model in `context/project-overview.md`
+- First migration generated with `drizzle-kit generate` and applied with `drizzle-kit migrate`
+- Hyperdrive config bound to the Worker as `HYPERDRIVE`
+- `GET /health` route that runs `select 1` through Hyperdrive
 
 ## Notes
 
-<!-- Any extra notes -->
+- Research: `context/research/drizzle.md`
+- Use `pg` (node-postgres); Postgres.js isn't supported with Hyperdrive
+- Give Hyperdrive Neon's direct (non-pooled) connection string
+- Credentials live only in gitignored `worker/.env.prod` and in local env vars, never in committed files
+- Never use `drizzle-kit push`
 
 ## History
 
