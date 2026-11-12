@@ -1,22 +1,17 @@
-# Current Feature: Profile Card Name
-
-Show the user's saved name on the main page's Profile card instead of "Your profile".
+# Current Feature
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+<!-- Not Started | In Progress | Completed -->
 
 ## Goals
 
-- Rename the Profile sheet's "Done" button to "Save".
-- After Save is pressed in the Profile sheet, the Profile card shows the saved name (e.g. "Devin · Male, 30").
-- With no name (empty or only spaces), the card still shows "Your profile".
-- The card doesn't change while typing in the sheet, only after saving.
+<!-- Goals and requirements -->
 
 ## Notes
 
-- One-line change in `App.tsx`; the card reads the saved `details`, not the sheet's draft.
-- Long names are cut off with an ellipsis by the card's existing `numberOfLines={1}`.
+<!-- Any extra notes -->
 
 ## History
 
@@ -41,3 +36,4 @@ In Progress
 - 2026-11-11: Added the BMI panel to the Profile sheet (`src/lib/bmi.ts`, `BmiPanel`): live BMI to one decimal, category (Normal in the accent color, others muted) and healthy weight range in kg or lb, plus the BMI disclaimer below Height and Weight. Range edges are adjusted to agree with the category (69 in shows 125–168 lb, and 169 lb is Overweight), and BMI is calculated from the values shown in the steppers. Under 20, the panel shows only the BMI with "Adult ranges don't apply under 20." at the same size. Lowered the weight stepper minimum to 18 kg / 40 lb so every healthy range is reachable. Every stepper combination was checked in both unit systems. Tested in the iOS simulator.
 - 2026-11-11: Set up the Postgres database on Neon with Drizzle ORM in a new `worker/` Cloudflare Worker package (Hono, `pg`). Added the schema for `users`, `workouts` and `exercise_cache`, with enums and gender as `female`, `male`, `unknown` (the app's `Gender` type was changed to match), and applied the `0000_init` migration. Created Hyperdrive config `fan-fit-db`, bound as `HYPERDRIVE`, and tested a `GET /health` route through it locally. Deploying and the app API client are on the back burner. Research saved in `context/research/drizzle.md`.
 - 2026-11-11: Added the Target Heart Rate panel next to the Age stepper in the Profile sheet (`src/lib/heartRate.ts`, `TargetHeartRatePanel`): Fat loss, Cardio and Muscle gain zones in bpm at 50–69%, 70–84% and 85–100% of an estimated max heart rate of 220 − age, updating live with age (age 30 shows 95–131, 133–160, 162–190). Each zone has a colored dot, using new `zone-*` tokens added to both `tailwind.config.js` and `src/theme.ts`. Zones never overlap for ages 13–90, and rows stay on one line on narrow screens. Checked in the iOS simulator.
+- 2026-11-11: The main page's Profile card now shows the saved name (e.g. "Devin · Male, 30"), falling back to "Your profile" when the name is empty, and updates only after saving. Renamed the Profile sheet's "Done" button to "Save".
