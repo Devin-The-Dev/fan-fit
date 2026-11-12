@@ -21,6 +21,9 @@ module.exports = {
         'text-subtle': '#7A807C',
         'text-on-accent': '#06140A',
         overlay: 'rgba(0, 0, 0, 0.6)',
+        'zone-fat-loss': '#22C3D6',
+        'zone-cardio': '#6BBF59',
+        'zone-muscle-gain': '#F07A6A',
       },
       borderRadius: {
         sm: '8px',

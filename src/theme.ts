@@ -22,6 +22,9 @@ export const COLORS = {
   textOnAccent: '#06140A',
   overlay: 'rgba(0, 0, 0, 0.6)',
   black: '#000000',
+  zoneFatLoss: '#22C3D6',
+  zoneCardio: '#6BBF59',
+  zoneMuscleGain: '#F07A6A',
 } as const;
 
 export const RADIUS = {
