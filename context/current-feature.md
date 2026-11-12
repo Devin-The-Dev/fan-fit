@@ -1,17 +1,31 @@
-# Current Feature
-<!-- Feature name and short description -->
+# Current Feature: Target Heart Rate
+
+Add the Target Heart Rate panel to the Profile sheet, next to the Age stepper, as shown in `context/screenshots/ProfileMenu.png`.
 
 ## Status
 
-<!-- Not Started | In Progress | Completed -->
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- Add `src/lib/heartRate.ts` with a pure function that takes age and returns three zones in bpm, based on an estimated max heart rate of `220 − age`:
+  - Fat loss: 50–69% of max
+  - Cardio: 70–84% of max
+  - Muscle gain: 85–100% of max
+- Round each edge to a whole bpm. Age 30 (max 190) must show Fat loss 95–131, Cardio 133–160, Muscle gain 162–190, matching the screenshot.
+- Add a `TargetHeartRatePanel` component in `src/components/mainMenu/` on NativeWind: bordered card with a "TARGET HEART RATE" label, then one row per zone with a colored dot, the zone name and the `low–high bpm` range.
+- Put the panel in the slot reserved next to the Age stepper in `ProfileForm.tsx` (replacing the empty `h-[76px]` placeholder) and keep the Age row layout from the screenshot.
+- Update the panel live as the Age stepper changes (13–90).
+- Add theme tokens for the three dot colors (cyan, green, coral) to both `tailwind.config.js` and `src/theme.ts`; no hard-coded hex values in the component.
+- `npx tsc --noEmit` passes, and the panel is checked in the iOS simulator at the min, default and max ages.
 
 ## Notes
 
-<!-- Any extra notes -->
+- Reference: `context/screenshots/ProfileMenu.png` (panel top right, next to Age).
+- The zone percentages were worked back from the screenshot numbers at age 30, so the bands don't overlap (131 → 133, 160 → 162).
+- The panel only displays values; nothing new is stored in the profile, and age is already in `ProfileDetails`.
+- The panel must fit at half the sheet width next to the stepper; check that "Muscle gain 162–190 bpm" doesn't wrap or get cut off on small screens.
+- Like the BMI panel, it's a general estimate. Adding a disclaimer isn't in scope unless requested.
 
 ## History
 

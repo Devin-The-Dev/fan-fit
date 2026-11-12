@@ -15,6 +15,7 @@ import { BmiPanel } from './BmiPanel';
 import { type Option, OptionGroup } from './OptionGroup';
 import { SectionLabel } from './SectionLabel';
 import { Stepper } from './Stepper';
+import { TargetHeartRatePanel } from './TargetHeartRatePanel';
 
 const MIN_AGE = 13;
 const MAX_AGE = 90;
@@ -82,12 +83,9 @@ export function ProfileForm({ draft, genderOptions, onChange }: Props) {
       />
 
       <SectionLabel variant="field">Age</SectionLabel>
-      <View className="flex-row items-center gap-2 mb-4">
-        <View className="flex-1">
-          <Stepper label="age" value={draft.age} min={MIN_AGE} max={MAX_AGE} onChange={(age) => onChange({ age })} />
-        </View>
-        {/* Reserved for the Target Heart Rate panel */}
-        <View className="flex-1 h-[76px]" />
+      <View className="flex-row items-center gap-3 mb-4">
+        <Stepper label="age" value={draft.age} min={MIN_AGE} max={MAX_AGE} onChange={(age) => onChange({ age })} />
+        <TargetHeartRatePanel age={draft.age} />
       </View>
 
       <SectionLabel variant="field">Units</SectionLabel>
