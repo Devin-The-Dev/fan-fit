@@ -144,7 +144,7 @@ function HomeBody() {
 
         <View style={styles.section}>
           <SectionLabel>Profile</SectionLabel>
-          <ProfileCard summary={`Your profile · ${genderLabel}, ${details.age}`} onEdit={() => setProfileOpen(true)} />
+          <ProfileCard summary={`${details.name.trim() || 'Your profile'} · ${genderLabel}, ${details.age}`} onEdit={() => setProfileOpen(true)} />
         </View>
 
         <View className="mb-7">

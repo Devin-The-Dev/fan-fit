@@ -87,7 +87,7 @@ export function ProfileSheet({ visible, details, genderOptions, onSave, onClose 
             accessibilityRole="button"
             className="mt-6 py-[18px] items-center rounded-lg bg-accent active:bg-accent-pressed"
           >
-            <Text className="text-text-on-accent text-[18px] font-extrabold">Done</Text>
+            <Text className="text-text-on-accent text-[18px] font-extrabold">Save</Text>
           </Pressable>
         </View>
       </View>

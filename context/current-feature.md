@@ -1,17 +1,22 @@
-# Current Feature
-<!-- Feature name and short description -->
+# Current Feature: Profile Card Name
+
+Show the user's saved name on the main page's Profile card instead of "Your profile".
 
 ## Status
 
-<!-- Not Started | In Progress | Completed -->
+In Progress
 
 ## Goals
 
-<!-- Goals and requirements -->
+- Rename the Profile sheet's "Done" button to "Save".
+- After Save is pressed in the Profile sheet, the Profile card shows the saved name (e.g. "Devin · Male, 30").
+- With no name (empty or only spaces), the card still shows "Your profile".
+- The card doesn't change while typing in the sheet, only after saving.
 
 ## Notes
 
-<!-- Any extra notes -->
+- One-line change in `App.tsx`; the card reads the saved `details`, not the sheet's draft.
+- Long names are cut off with an ellipsis by the card's existing `numberOfLines={1}`.
 
 ## History
 
