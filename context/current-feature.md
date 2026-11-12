@@ -1,31 +1,17 @@
-# Current Feature: Target Heart Rate
-
-Add the Target Heart Rate panel to the Profile sheet, next to the Age stepper, as shown in `context/screenshots/ProfileMenu.png`.
+# Current Feature
+<!-- Feature name and short description -->
 
 ## Status
 
-In Progress
+<!-- Not Started | In Progress | Completed -->
 
 ## Goals
 
-- Add `src/lib/heartRate.ts` with a pure function that takes age and returns three zones in bpm, based on an estimated max heart rate of `220 − age`:
-  - Fat loss: 50–69% of max
-  - Cardio: 70–84% of max
-  - Muscle gain: 85–100% of max
-- Round each edge to a whole bpm. Age 30 (max 190) must show Fat loss 95–131, Cardio 133–160, Muscle gain 162–190, matching the screenshot.
-- Add a `TargetHeartRatePanel` component in `src/components/mainMenu/` on NativeWind: bordered card with a "TARGET HEART RATE" label, then one row per zone with a colored dot, the zone name and the `low–high bpm` range.
-- Put the panel in the slot reserved next to the Age stepper in `ProfileForm.tsx` (replacing the empty `h-[76px]` placeholder) and keep the Age row layout from the screenshot.
-- Update the panel live as the Age stepper changes (13–90).
-- Add theme tokens for the three dot colors (cyan, green, coral) to both `tailwind.config.js` and `src/theme.ts`; no hard-coded hex values in the component.
-- `npx tsc --noEmit` passes, and the panel is checked in the iOS simulator at the min, default and max ages.
+<!-- Goals and requirements -->
 
 ## Notes
 
-- Reference: `context/screenshots/ProfileMenu.png` (panel top right, next to Age).
-- The zone percentages were worked back from the screenshot numbers at age 30, so the bands don't overlap (131 → 133, 160 → 162).
-- The panel only displays values; nothing new is stored in the profile, and age is already in `ProfileDetails`.
-- The panel must fit at half the sheet width next to the stepper; check that "Muscle gain 162–190 bpm" doesn't wrap or get cut off on small screens.
-- Like the BMI panel, it's a general estimate. Adding a disclaimer isn't in scope unless requested.
+<!-- Any extra notes -->
 
 ## History
 
@@ -49,3 +35,4 @@ In Progress
 - 2026-11-10: Redesigned the Profile sheet to match `ProfileMenu.png`: added name, Metric/Imperial units, and height and weight steppers (stored in metric, converted for display in `src/lib/units.ts`), with empty slots reserved for the future BMI and Target Heart Rate panels. Split the sheet into `ProfileSheet`, `ProfileForm` and a reusable `Stepper`, all on NativeWind. Done saves the profile, and closing with unsaved changes asks to discard them. The sheet offers only Female and Male, and "Prefer not to say" is now labeled "Unknown". Tested in the iOS simulator.
 - 2026-11-11: Added the BMI panel to the Profile sheet (`src/lib/bmi.ts`, `BmiPanel`): live BMI to one decimal, category (Normal in the accent color, others muted) and healthy weight range in kg or lb, plus the BMI disclaimer below Height and Weight. Range edges are adjusted to agree with the category (69 in shows 125–168 lb, and 169 lb is Overweight), and BMI is calculated from the values shown in the steppers. Under 20, the panel shows only the BMI with "Adult ranges don't apply under 20." at the same size. Lowered the weight stepper minimum to 18 kg / 40 lb so every healthy range is reachable. Every stepper combination was checked in both unit systems. Tested in the iOS simulator.
 - 2026-11-11: Set up the Postgres database on Neon with Drizzle ORM in a new `worker/` Cloudflare Worker package (Hono, `pg`). Added the schema for `users`, `workouts` and `exercise_cache`, with enums and gender as `female`, `male`, `unknown` (the app's `Gender` type was changed to match), and applied the `0000_init` migration. Created Hyperdrive config `fan-fit-db`, bound as `HYPERDRIVE`, and tested a `GET /health` route through it locally. Deploying and the app API client are on the back burner. Research saved in `context/research/drizzle.md`.
+- 2026-11-11: Added the Target Heart Rate panel next to the Age stepper in the Profile sheet (`src/lib/heartRate.ts`, `TargetHeartRatePanel`): Fat loss, Cardio and Muscle gain zones in bpm at 50–69%, 70–84% and 85–100% of an estimated max heart rate of 220 − age, updating live with age (age 30 shows 95–131, 133–160, 162–190). Each zone has a colored dot, using new `zone-*` tokens added to both `tailwind.config.js` and `src/theme.ts`. Zones never overlap for ages 13–90, and rows stay on one line on narrow screens. Checked in the iOS simulator.
